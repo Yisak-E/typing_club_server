@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from flask import Blueprint, jsonify, render_template, request
 from flask_jwt_extended import create_access_token
 
@@ -48,3 +50,26 @@ def login():
         return jsonify({'message': 'wrong password'}), 401
 
     access_token = create_access_token(identity=str(user.id))
+
+    return jsonify({
+        'access_token': access_token,
+        'token_type': 'bearer',
+        'user':{
+            'id': user.id,
+            'username': user.username
+        }
+    }), 200
+
+@auth_bp.post('/logout')
+def logout():
+    data = request.get_json()
+    current_user = User.query.filter_by(username=data['username']).first()
+    access_token = create_access_token(identity=str(current_user.id), expires_delta=timedelta(seconds=1))
+    return jsonify({
+        'access_token': access_token,
+        'token_type': 'bearer',
+        'user':{
+            'id': current_user.id,
+            'username': current_user.username
+        }
+    })
