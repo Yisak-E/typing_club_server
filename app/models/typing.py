@@ -14,7 +14,7 @@ from app import db
 
 
 class TypeTest(db.Model):
-    test_id = db.Column(db.Integer, primary_key=True)
+    test_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     prompt = db.Column(db.String(10000), nullable=False)
     time_limit = db.Column(db.Integer, nullable=False)
