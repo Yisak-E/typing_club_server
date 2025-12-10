@@ -1,3 +1,6 @@
+import json
+import random
+
 from flask import Blueprint, jsonify, request
 import google.generativeai as gai
 from dotenv import load_dotenv
@@ -87,5 +90,23 @@ def get_text_ai():
 def get_text():
     level = request.args.get('level', type=int)
     datas = []
+    current_text = None
 
-    with open()
+    with open('C://Users//yisak//PycharmProjects//flaskpro//TypingClub//data.json', 'r') as f:
+        datas = json.load(f)
+    if not level:
+        return jsonify({"message": "in valid post request"}), 400
+    index = random.randint(0, 25)
+
+    for data in datas:
+        if level == data['level'] and index == data['id']:
+            current_text = data['behavior']
+            return jsonify({'content': current_text}), 200
+
+
+    if current_text is None:
+        current_text = datas[0]['behavior']
+        return jsonify({'content': current_text}), 200
+
+    return jsonify({'invalid': "invalid request"}), 200
+
