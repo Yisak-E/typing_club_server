@@ -28,9 +28,10 @@ def test():
     if not data:
         return jsonify({"message": "Invalid JSON"}), 400
 
+    # 1. Extract exactly what the frontend sends
     words_typed = data.get('words_typed')
-    notes = data.get('notes')
     time_limit = data.get('time_limit', 0)
+    notes = data.get('notes')
 
     try:
         accuracy = float(data.get('accuracy'))
@@ -41,19 +42,20 @@ def test():
     if not words_typed:
         return jsonify({"message": "words_typed is required"}), 400
 
+    # 2. Create the streamlined record
     test_taken = TypeTest(
         words_typed=words_typed,
         accuracy=accuracy,
         wpm=wpm,
-        notes=notes,
-        time_limit=time_limit
+        time_limit=time_limit,
+        notes=notes
     )
 
     db.session.add(test_taken)
     db.session.commit()
 
     return jsonify({
-        'message': 'test successfully registered',
+        'message': 'Test successfully saved',
         'test': test_taken.serialize()
     }), 201
 
@@ -75,3 +77,17 @@ def get_text():
 
     selected = random.choice(filtered)
     return jsonify({'content': selected['behavior']}), 200
+
+
+@type_bp.get("/results")
+def results():
+    _results = TypeTest.query.all()
+
+    serialized_result = [r.serialize() for r in _results]
+
+    sored_result = sorted(serialized_result, key=lambda x: x['wpm'], reverse=True)
+
+    return jsonify({
+        "results": sored_result
+    }), 200
+
